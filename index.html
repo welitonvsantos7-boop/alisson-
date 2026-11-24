@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TEX BURGUER — Sistema de Pedidos e Estoque</title>
+  <style>
+    * { box-sizing: border-box; font-family: "Trebuchet MS", "Segoe UI", Roboto, sans-serif; }
+    body {
+      margin: 0;
+      background: radial-gradient(circle at top, #2b1d16 0%, #160f0c 100%);
+      color: #f6ead4;
+      padding-bottom: 52px;
+      min-height: 100vh;
+    }
+    header {
+      background: linear-gradient(180deg, #8e1612 0%, #5e0d0a 100%);
+      color: #f7c948;
+      padding: 16px 12px;
+      text-align: center;
+      border-bottom: 3px solid #f7c948;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    }
+    .brand-title {
+      font-size: 1.55rem;
+      font-weight: 900;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      text-shadow: 2px 2px 0 #160f0c;
+    }
+    .brand-sub {
+      font-size: 0.72rem;
+      letter-spacing: 1.5px;
+      color: #f6ead4;
+      text-transform: uppercase;
+      margin-top: 3px;
+    }
+    nav {
+      display: flex;
+      background: #1f140f;
+      border-bottom: 2px solid #7a5827;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    nav button {
+      flex: 1;
+      padding: 12px 4px;
+      border: none;
+      background: transparent;
+      color: #d8c39e;
+      font-weight: 800;
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+    }
+    nav button.active {
+      color: #f7c948;
+      border-bottom: 3px solid #f7c948;
+      background: #8e1612;
+    }
+    .tab { display: none; padding: 14px; max-width: 640px; margin: auto; }
+    .tab.active { display: block; }
+    .card {
+      background: #231812;
+      border: 1.5px dashed #8c6632;
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 14px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+    }
+    .section-tag {
+      display: inline-block;
+      background: #8e1612;
+      color: #f7c948;
+      border: 1px solid #f7c948;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      font-weight: 900;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+    .item-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px dotted #6e5028;
+      padding: 10px 0;
+      gap: 10px;
+    }
+    .item-row:last-child { border-bottom: none; }
+    .item-name {
+      color: #f7c948;
+      font-weight: 900;
+      font-size: 1rem;
+      letter-spacing: 0.5px;
+    }
+    .item-desc {
+      display: block;
+      color: #cbb896;
+      font-size: 0.78rem;
+      margin-top: 2px;
+      line-height: 1.25;
+    }
+    .item-price {
+      color: #f6ead4;
+      font-weight: 800;
+      font-size: 0.9rem;
+    }
+    .btn {
+      background: #8e1612;
+      color: #f7c948;
+      border: 1px solid #f7c948;
+      padding: 10px 14px;
+      border-radius: 6px;
+      font-weight: 800;
+      text-transform: uppercase;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+    .btn-green {
+      background: #256029;
+      color: #fff8e1;
+      border: 1px solid #81c784;
+    }
+    .btn-blue {
+      background: #1b4965;
+      color: #e3f2fd;
+      border: 1px solid #64b5f6;
+    }
+    .btn-gray {
+      background: #3e2c22;
+      color: #f6ead4;
+      border: 1px solid #8c6632;
+    }
+    .btn-dark {
+      background: #120b08;
+      color: #f7c948;
+      border: 1px solid #f7c948;
+    }
+    .btn-small { padding: 6px 10px; font-size: 0.85rem; }
+    input, textarea {
+      width: 100%;
+      padding: 10px;
+      margin: 6px 0 12px;
+      border: 1px solid #8c6632;
+      background: #160f0c;
+      color: #f6ead4;
+      border-radius: 6px;
+      font-size: 0.98rem;
+    }
+    input::placeholder, textarea::placeholder { color: #9c8868; }
+    .badge {
+      background: #f7c948;
+      color: #160f0c;
+      padding: 2px 7px;
+      border-radius: 10px;
+      font-size: 0.75rem;
+      font-weight: 900;
+    }
+    .pedido-box {
+      border-left: 5px solid #f7c948;
+      background: #2a1c15;
+    }
+    .pedido-obs {
+      background: #3d120e;
+      border: 1px solid #f7c948;
+      padding: 8px;
+      border-radius: 5px;
+      margin: 8px 0;
+      font-weight: 800;
+      color: #f7c948;
+    }
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; text-align: center; }
+    .stat-val { font-size: 1.15rem; font-weight: 900; margin-top: 4px; }
+    .repor-bar { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; align-items: center; }
+    .repor-input { width: 72px !important; margin: 0 !important; padding: 6px 8px !important; font-size: 0.9rem !important; }
+    .baixo-estoque { color: #ff6b6b; font-weight: 900; }
+    #status-sync { text-align: center; font-size: 0.76rem; color: #cbb896; margin-top: 8px; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="brand-title">★ TEX BURGUER ★</div>
+  <div class="brand-sub">Burgers de Verdade Feitos na Brasa • Sabor que Marca</div>
+</header>
+
+<nav>
+  <button class="active" onclick="abrirAba('pedidos', this)">Pedidos</button>
+  <button onclick="abrirAba('cozinha', this)">Cozinha <span id="badge-cozinha" class="badge">0</span></button>
+  <button onclick="abrirAba('estoque', this)">Preços/Estoque</button>
+  <button onclick="abrirAba('caixa', this)">Caixa Dia</button>
+</nav>
+
+<div id="status-sync">Sincronizando com a brasa...</div>
+
+<!-- ABA 1: TIRAR PEDIDOS -->
+<div id="pedidos" class="tab active">
+  <div class="card">
+    <span class="section-tag">Comanda / Cliente</span>
+    <input type="text" id="mesa" placeholder="Ex: Mesa 04, Balcão ou Nome do Cliente">
+
+    <span class="section-tag">Cardápio TEX BURGUER</span>
+    <div id="lista-cardapio">Carregando cardápio...</div>
+  </div>
+
+  <div class="card">
+    <span class="section-tag">Observações para a Cozinha</span>
+    <textarea id="obs" rows="2" placeholder="Ex: Sem cebola, ponto da carne, sem gelo..."></textarea>
+    <div style="font-size: 1.2rem; margin-bottom: 12px; color: #f7c948;">
+      Total do Pedido: <strong id="total-pedido">R$ 0,00</strong>
+    </div>
+    <button id="btn-enviar" class="btn btn-green" style="width: 100%; font-size: 1.05rem;" onclick="enviarPedido()">Enviar Pedido para Cozinha</button>
+  </div>
+</div>
+
+<!-- ABA 2: TELA DA COZINHA -->
+<div id="cozinha" class="tab">
+  <button class="btn" style="width:100%; margin-bottom:12px;" onclick="ativarSom()">🔔 Ativar Alerta Sonoro da Cozinha</button>
+  <div id="lista-cozinha">Nenhum pedido pendente.</div>
+</div>
+
+<!-- ABA 3: PREÇO DE CUSTO, VENDA E ESTOQUE -->
+<div id="estoque" class="tab">
+  <div class="card">
+    <span class="section-tag">Cadastrar / Editar Item</span>
+    <input type="hidden" id="prod-id">
+    <input type="text" id="prod-nome" placeholder="Nome do Lanche, Porção ou Bebida">
+    <div style="display:flex; gap:8px;">
+      <input type="number" step="0.01" id="prod-custo" placeholder="Custo R$">
+      <input type="number" step="0.01" id="prod-venda" placeholder="Venda R$">
+      <input type="number" id="prod-estoque" placeholder="Estoque">
+    </div>
+    <button class="btn btn-green" style="width:100%;" onclick="salvarProduto()">Salvar na Planilha</button>
+  </div>
+
+  <div class="card">
+    <span class="section-tag">Reposição Rápida de Estoque</span>
+    <div class="item-desc" style="margin-bottom:8px;">Toque em +1, +5, +10, +20 ou digite a quantidade que chegou e clique em Repor.</div>
+    <div id="lista-estoque"></div>
+  </div>
+</div>
+
+<!-- ABA 4: CAIXA DO DIA -->
+<div id="caixa" class="tab">
+  <div class="card grid-3">
+    <div>
+      <small style="color:#cbb896;">Entrou (Venda)</small>
+      <div class="stat-val" style="color:#81c784;" id="resumo-venda">R$ 0,00</div>
+    </div>
+    <div>
+      <small style="color:#cbb896;">Custo Total</small>
+      <div class="stat-val" style="color:#ff8a80;" id="resumo-custo">R$ 0,00</div>
+    </div>
+    <div>
+      <small style="color:#cbb896;">Lucro Líquido</small>
+      <div class="stat-val" style="color:#f7c948;" id="resumo-lucro">R$ 0,00</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <button class="btn btn-dark" style="width:100%;" onclick="encerrarDia()">🔒 Encerrar Dia (Salvar Resumo e Limpar Pedidos)</button>
+  </div>
+
+  <div class="card">
+    <span class="section-tag">Pedidos do Dia</span>
+    <div id="lista-historico"></div>
+  </div>
+</div>
+
+<script>
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwzqBoBrfW9mgtG0Bt9I7bgbZcES1TX2bPZkwuxtVkDlO-cFxqlZN8AD88kRLDHPlZ9Og/exec";
+
+  const DESCRICOES_CARDAPIO = {
+    "TEX BRUTO": "Pão brioche, burger na brasa, queijo, costela desfiada, bacon, rúcula, tomate e cebola.",
+    "TEX COWBOY": "Pão brioche, burger na brasa, catupiry maçaricado e costela desfiada.",
+    "TEX PEÃO": "Pão brioche, burger na brasa, catupiry maçaricado e lombinho desfiado.",
+    "TEX MATUTO": "Pão brioche, burger na brasa, catupiry maçaricado, farofa de calabresa e cebola.",
+    "TEX BRAVO": "Pão brioche, burger na brasa, bacon, cheddar, tomate, alface e cebola.",
+    "TEX BACON": "Pão brioche na chapa, tiras de bacon, cebola caramelizada, cheddar, queijo muçarela e burger na brasa.",
+    "TEX HAVAI": "Pão brioche na chapa, tiras de bacon, geleia de abacaxi com pimenta, catupiry, queijo muçarela e burger na brasa.",
+    "TEX BURGUER": "Pão brioche, burger na brasa e queijo.",
+    "TEX SALADA": "Pão brioche, alface, tomate, catupiry, molho especial, queijo muçarela e burger na brasa.",
+    "PANCETA": "Panceta crocante, temperada e no ponto certo.",
+    "TEX FRIES": "Batata frita, cheddar, bacon, farofa e molho especial.",
+    "TEX FRIES COSTELA": "Batata frita, cheddar, costela desfiada, farofa e molho especial.",
+    "TEX FRIES CALABRESA": "Batata frita, cheddar, calabresa, farofa e molho especial."
+  };
+
+  let cardapio = [];
+  let carrinho = {};
+  let qtdPendentesAnterior = 0;
+  let somAtivo = false;
+  let carregando = false;
+
+  function abrirAba(id, btn) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    btn.classList.add('active');
+  }
+
+  function ativarSom() {
+    somAtivo = true;
+    tocarBip();
+    alert("Alerta sonoro ativado neste aparelho!");
+  }
+
+  function tocarBip() {
+    if (!somAtivo) return;
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = ctx.createOscillator();
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(880, ctx.currentTime);
+      osc.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.45);
+    } catch (e) {}
+  }
+
+  async function carregarDados() {
+    if (carregando) return;
+    carregando = true;
+    try {
+      const res = await fetch(`${SCRIPT_URL}?action=getData`);
+      const data = await res.json();
+      cardapio = data.cardapio || [];
+      renderizarCardapio();
+      renderizarEstoque();
+      renderizarCozinhaEHistorico(data.pedidos || []);
+      const agora = new Date().toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+      document.getElementById("status-sync").innerText = `Atualizado às ${agora}`;
+    } catch (e) {
+      document.getElementById("status-sync").innerText = "Erro de conexão ao atualizar.";
+    } finally {
+      carregando = false;
+    }
+  }
+
+  function renderizarCardapio() {
+    const div = document.getElementById("lista-cardapio");
+    if (cardapio.length === 0) {
+      div.innerHTML = "<p style='color:#cbb896;'>Nenhum item cadastrado na aba Cardapio da planilha.</p>";
+      atualizarTotal();
+      return;
+    }
+    div.innerHTML = "";
+    cardapio.forEach(item => {
+      const qtd = carrinho[item.id] || 0;
+      const alertaEstoque = item.estoque <= 5 ? 'baixo-estoque' : '';
+      const desc = DESCRICOES_CARDAPIO[item.produto.toUpperCase()] || "";
+      div.innerHTML += `
+        <div class="item-row">
+          <div>
+            <span class="item-name">${item.produto}</span>
+            ${desc ? `<span class="item-desc">${desc}</span>` : ""}
+            <span class="item-price">R$ ${item.venda.toFixed(2)}</span> • <small class="${alertaEstoque}">Estoque: ${item.estoque}</small>
+          </div>
+          <div style="white-space:nowrap;">
+            <button class="btn btn-small" onclick="alterarQtd('${item.id}', -1)">-</button>
+            <strong style="margin: 0 8px; color:#f7c948;">${qtd}</strong>
+            <button class="btn btn-small btn-green" onclick="alterarQtd('${item.id}', 1)">+</button>
+          </div>
+        </div>
+      `;
+    });
+    atualizarTotal();
+  }
+
+  function alterarQtd(id, delta) {
+    carrinho[id] = Math.max(0, (carrinho[id] || 0) + delta);
+    renderizarCardapio();
+  }
+
+  function atualizarTotal() {
+    let total = 0;
+    cardapio.forEach(item => {
+      total += (carrinho[item.id] || 0) * item.venda;
+    });
+    document.getElementById("total-pedido").innerText = `R$ ${total.toFixed(2)}`;
+  }
+
+  async function enviarPedido() {
+    const btn = document.getElementById("btn-enviar");
+    const mesa = document.getElementById("mesa").value.trim() || "Balcão";
+    const obs = document.getElementById("obs").value.trim();
+    let itensArray = [];
+    let itensTexto = [];
+    let vendaTotal = 0;
+    let custoTotal = 0;
+
+    cardapio.forEach(item => {
+      const qtd = carrinho[item.id] || 0;
+      if (qtd > 0) {
+        itensArray.push({ id: item.id, qtd });
+        itensTexto.push(`${qtd}x ${item.produto}`);
+        vendaTotal += qtd * item.venda;
+        custoTotal += qtd * item.custo;
+      }
+    });
+
+    if (itensArray.length === 0) return alert("Selecione pelo menos 1 item!");
+
+    btn.disabled = true;
+    btn.innerText = "Enviando...";
+    try {
+      await fetch(SCRIPT_URL, {
+        method: "POST",
+        body: JSON.stringify({
+          action: "novoPedido",
+          mesa, obs,
+          itensTexto: itensTexto.join(", "),
+          itensArray,
+          vendaTotal,
+          custoTotal
+        })
+      });
+      carrinho = {};
+      document.getElementById("mesa").value = "";
+      document.getElementById("obs").value = "";
+      alert("Pedido enviado para a cozinha!");
+      await carregarDados();
+    } finally {
+      btn.disabled = false;
+      btn.innerText = "Enviar Pedido para Cozinha";
+    }
+  }
+
+  function renderizarCozinhaEHistorico(pedidos) {
+    const pendentes = pedidos.filter(p => p.status === "PENDENTE");
+    document.getElementById("badge-cozinha").innerText = pendentes.length;
+
+    if (pendentes.length > qtdPendentesAnterior) {
+      tocarBip();
+    }
+    qtdPendentesAnterior = pendentes.length;
+
+    const divCozinha = document.getElementById("lista-cozinha");
+    divCozinha.innerHTML = pendentes.length === 0 ? "<div class='card'>Nenhum pedido pendente.</div>" : "";
+    pendentes.forEach(p => {
+      divCozinha.innerHTML += `
+        <div class="card pedido-box">
+          <div style="display:flex; justify-content:space-between; color:#f7c948;">
+            <strong>${p.mesa} (${p.id})</strong>
+            <small>${p.hora}</small>
+          </div>
+          <p style="font-size:1.1rem; margin:8px 0; font-weight:800;">${p.itens}</p>
+          ${p.obs ? `<div class="pedido-obs">OBS: ${p.obs}</div>` : ""}
+          <button class="btn btn-green" style="width:100%;" onclick="marcarPronto('${p.id}')">✅ Marcar como Pronto</button>
+        </div>
+      `;
+    });
+
+    let somaVenda = 0, somaCusto = 0, somaLucro = 0;
+    const divHist = document.getElementById("lista-historico");
+    divHist.innerHTML = pedidos.length === 0 ? "<p style='color:#cbb896;'>Nenhum pedido registrado hoje.</p>" : "";
+
+    pedidos.slice().reverse().forEach(p => {
+      somaVenda += p.vendaTotal;
+      somaCusto += p.custoTotal;
+      somaLucro += p.lucro;
+      divHist.innerHTML += `
+        <div class="item-row">
+          <div>
+            <strong style="color:#f7c948;">${p.mesa}</strong> - <small>${p.hora}</small> [${p.status}]<br>
+            <small>${p.itens}</small>
+          </div>
+          <div style="text-align:right;">
+            <strong>R$ ${p.vendaTotal.toFixed(2)}</strong><br>
+            <small style="color:#81c784;">Lucro: R$ ${p.lucro.toFixed(2)}</small>
+          </div>
+        </div>
+      `;
+    });
+
+    document.getElementById("resumo-venda").innerText = `R$ ${somaVenda.toFixed(2)}`;
+    document.getElementById("resumo-custo").innerText = `R$ ${somaCusto.toFixed(2)}`;
+    document.getElementById("resumo-lucro").innerText = `R$ ${somaLucro.toFixed(2)}`;
+  }
+
+  async function marcarPronto(id) {
+    await fetch(SCRIPT_URL, {
+      method: "POST",
+      body: JSON.stringify({ action: "marcarPronto", id })
+    });
+    await carregarDados();
+  }
+
+  function renderizarEstoque() {
+    const div = document.getElementById("lista-estoque");
+    if (cardapio.length === 0) {
+      div.innerHTML = "<p style='color:#cbb896;'>Nenhum item cadastrado.</p>";
+      return;
+    }
+    div.innerHTML = "";
+    cardapio.forEach(item => {
+      const margem = (item.venda - item.custo).toFixed(2);
+      const alertaEstoque = item.estoque <= 5 ? 'baixo-estoque' : '';
+      const nomeEscapado = item.produto.replace(/'/g, "\\'");
+      div.innerHTML += `
+        <div class="item-row" style="flex-direction: column; align-items: stretch;">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <span class="item-name">${item.produto}</span> — <span class="${alertaEstoque}">Estoque: ${item.estoque}</span><br>
+              <small style="color:#cbb896;">Custo: R$ ${item.custo.toFixed(2)} | Venda: R$ ${item.venda.toFixed(2)} | Lucro/un: R$ ${margem}</small>
+            </div>
+            <button class="btn btn-gray btn-small" onclick="editarProduto('${item.id}', '${nomeEscapado}', ${item.custo}, ${item.venda}, ${item.estoque})">✏️ Editar</button>
+          </div>
+          <div class="repor-bar">
+            <button class="btn btn-blue btn-small" onclick="reporRapido('${item.id}', 1)">+1</button>
+            <button class="btn btn-blue btn-small" onclick="reporRapido('${item.id}', 5)">+5</button>
+            <button class="btn btn-blue btn-small" onclick="reporRapido('${item.id}', 10)">+10</button>
+            <button class="btn btn-blue btn-small" onclick="reporRapido('${item.id}', 20)">+20</button>
+            <input type="number" id="repor-qtd-${item.id}" class="repor-input" placeholder="Qtd" min="1">
+            <button class="btn btn-green btn-small" onclick="reporPersonalizado('${item.id}')">Repor</button>
+          </div>
+        </div>
+      `;
+    });
+  }
+
+  async function reporRapido(id, qtdAdicionar) {
+    await fetch(SCRIPT_URL, {
+      method: "POST",
+      body: JSON.stringify({ action: "reporEstoque", id, qtdAdicionar })
+    });
+    await carregarDados();
+  }
+
+  async function reporPersonalizado(id) {
+    const input = document.getElementById(`repor-qtd-${id}`);
+    const qtdAdicionar = Number(input.value);
+    if (!qtdAdicionar || qtdAdicionar <= 0) return alert("Digite uma quantidade maior que zero.");
+    input.value = "";
+    await reporRapido(id, qtdAdicionar);
+  }
+
+  function editarProduto(id, nome, custo, venda, estoque) {
+    document.getElementById("prod-id").value = id;
+    document.getElementById("prod-nome").value = nome;
+    document.getElementById("prod-custo").value = custo;
+    document.getElementById("prod-venda").value = venda;
+    document.getElementById("prod-estoque").value = estoque;
+    window.scrollTo(0, 0);
+  }
+
+  async function salvarProduto() {
+    const id = document.getElementById("prod-id").value;
+    const produto = document.getElementById("prod-nome").value.trim();
+    const custo = document.getElementById("prod-custo").value;
+    const venda = document.getElementById("prod-venda").value;
+    const estoque = document.getElementById("prod-estoque").value;
+
+    if (!produto || !venda) return alert("Preencha pelo menos nome e preço de venda.");
+
+    await fetch(SCRIPT_URL, {
+      method: "POST",
+      body: JSON.stringify({ action: "salvarProduto", id, produto, custo, venda, estoque })
+    });
+
+    document.getElementById("prod-id").value = "";
+    document.getElementById("prod-nome").value = "";
+    document.getElementById("prod-custo").value = "";
+    document.getElementById("prod-venda").value = "";
+    document.getElementById("prod-estoque").value = "";
+    alert("Produto salvo na planilha!");
+    await carregarDados();
+  }
+
+  async function encerrarDia() {
+    if (!confirm("Tem certeza que deseja encerrar o dia? O resumo será salvo na aba Fechamentos e os pedidos de hoje serão limpos.")) return;
+    await fetch(SCRIPT_URL, {
+      method: "POST",
+      body: JSON.stringify({ action: "encerrarDia" })
+    });
+    qtdPendentesAnterior = 0;
+    alert("Dia encerrado e salvo na planilha!");
+    await carregarDados();
+  }
+
+  carregarDados();
+  setInterval(carregarDados, 5000);
+</script>
+</body>
+</html>
